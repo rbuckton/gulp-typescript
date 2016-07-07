@@ -205,7 +205,6 @@ export class Output {
 			base
 		});
 		if (file.original.gulp.sourceMap) fileJs.sourceMap = JSON.parse(file.sourceMapString);
-		this.streamJs.push(fileJs);
 
 		if (this.project.options.declaration) {
 			const fileDts = new gutil.File({
@@ -214,7 +213,12 @@ export class Output {
 				cwd: file.original.gulp.cwd,
 				base
 			});
-			this.streamDts.push(fileDts);
+			fileJs.types = fileDts;
+		}
+
+		this.streamJs.push(fileJs);
+		if (fileJs.types) {
+			this.streamDts.push(fileJs.types);
 		}
 	}
 
@@ -252,7 +256,7 @@ export class Output {
 	private getError(info: ts.Diagnostic): reporter.TypeScriptError {
 		let fileName = info.file && tsApi.getFileName(info.file);
 		const file = fileName && this.project.input.getFile(fileName);
-		
+
 		return utils.getError(info, this.project.typescript, file);
 	}
 	diagnostic(info: ts.Diagnostic) {

@@ -14,6 +14,7 @@ export interface VinylFile {
 	stat: {};
 	contents: {};
 	sourceMap?: any;
+	types?: any;
 	relative: string;
 	isBuffer(): boolean;
 	isStream(): boolean;

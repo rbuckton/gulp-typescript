@@ -9,10 +9,10 @@ var fs = require('fs');
 var gutil = require('gulp-util');
 var path = require('path');
 var stream = require('stream');
-var project = require('./project');
+var project_1 = require('./project');
 var utils = require('./utils');
 var _filter = require('./filter');
-var _reporter = require('./reporter');
+var reporter_1 = require('./reporter');
 var compiler = require('./compiler');
 var tsApi = require('./tsapi');
 var through2 = require('through2');
@@ -66,7 +66,7 @@ var CompileOutputStream = (function (_super) {
 }(stream.Readable));
 function compile(param, filters, theReporter) {
     var proj;
-    if (param instanceof project.Project) {
+    if (param instanceof project_1.Project) {
         proj = param;
         if (proj.running) {
             throw new Error('gulp-typescript: A project cannot be used in two compilations at the same time. Create multiple projects with createProject instead.');
@@ -79,7 +79,7 @@ function compile(param, filters, theReporter) {
     var inputStream = new CompileStream(proj);
     proj.reset(inputStream.js, inputStream.dts);
     proj.filterSettings = filters;
-    proj.reporter = theReporter || _reporter.defaultReporter();
+    proj.reporter = theReporter || reporter_1.defaultReporter();
     proj.compiler.prepare(proj);
     return inputStream;
 }
@@ -144,7 +144,7 @@ function getCompilerOptions(settings, projectPath, configFileName) {
             newSettings[option] = settings[option];
         }
         var result = typescript.convertCompilerOptionsFromJson(newSettings, projectPath, configFileName);
-        var reporter = _reporter.defaultReporter();
+        var reporter = reporter_1.defaultReporter();
         for (var _b = 0, _c = result.errors; _b < _c.length; _b++) {
             var error = _c[_b];
             reporter.error(utils.getError(error, typescript), typescript);
@@ -224,8 +224,6 @@ function getCompilerOptions(settings, projectPath, configFileName) {
 }
 var compile;
 (function (compile) {
-    compile.Project = project.Project;
-    compile.reporter = _reporter;
     function createProject(fileNameOrSettings, settings) {
         var tsConfigFileName = undefined;
         var tsConfigContent = undefined;
@@ -261,7 +259,7 @@ var compile;
                 settings = fileNameOrSettings;
             }
         }
-        var project = new compile.Project(tsConfigFileName, projectDirectory, tsConfigContent, getCompilerOptions(settings, projectDirectory, tsConfigFileName), settings.noExternalResolve ? true : false, settings.sortOutput ? true : false, settings.typescript);
+        var project = new project_1.Project(tsConfigFileName, projectDirectory, tsConfigContent, getCompilerOptions(settings, projectDirectory, tsConfigFileName), settings.noExternalResolve ? true : false, settings.sortOutput ? true : false, settings.typescript);
         // Isolated modules are only supported when using TS1.5+
         if (project.options['isolatedModules'] && !tsApi.isTS14(project.typescript)) {
             if (project.options.out !== undefined || project.options['outFile'] !== undefined || project.sortOutput) {
@@ -291,5 +289,15 @@ var compile;
         });
     }
     compile.filter = filter;
+    function types() {
+        return through2.obj(function (file, encoding, callback) {
+            this.push(file);
+            if (file.types) {
+                this.push(file.types);
+            }
+            callback();
+        });
+    }
+    compile.types = types;
 })(compile || (compile = {}));
 module.exports = compile;

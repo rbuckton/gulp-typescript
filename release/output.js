@@ -177,7 +177,6 @@ var Output = (function () {
         });
         if (file.original.gulp.sourceMap)
             fileJs.sourceMap = JSON.parse(file.sourceMapString);
-        this.streamJs.push(fileJs);
         if (this.project.options.declaration) {
             var fileDts = new gutil.File({
                 path: path.join(root, file.fileName + '.' + file.extension[OutputFileKind.Definitions]),
@@ -185,7 +184,11 @@ var Output = (function () {
                 cwd: file.original.gulp.cwd,
                 base: base
             });
-            this.streamDts.push(fileDts);
+            fileJs.types = fileDts;
+        }
+        this.streamJs.push(fileJs);
+        if (fileJs.types) {
+            this.streamDts.push(fileJs.types);
         }
     };
     Output.prototype.finish = function (results) {

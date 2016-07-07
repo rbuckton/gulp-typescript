@@ -1,12 +1,12 @@
 import * as ts from 'typescript';
 import * as stream from 'stream';
-import * as project from './project';
-import * as _reporter from './reporter';
+import { Project } from './project';
+import { Reporter } from './reporter';
 declare function compile(): compile.CompileStream;
-declare function compile(proj: project.Project, filters?: compile.FilterSettings, theReporter?: _reporter.Reporter): compile.CompileStream;
-declare function compile(settings: compile.Settings, filters?: compile.FilterSettings, theReporter?: _reporter.Reporter): compile.CompileStream;
+declare function compile(proj: Project, filters?: compile.FilterSettings, theReporter?: Reporter): compile.CompileStream;
+declare function compile(settings: compile.Settings, filters?: compile.FilterSettings, theReporter?: Reporter): compile.CompileStream;
 declare module compile {
-    interface CompileStream extends stream.Readable {
+    interface CompileStream extends stream.Duplex {
         js: stream.Readable;
         dts: stream.Readable;
     }
@@ -43,10 +43,9 @@ declare module compile {
     interface FilterSettings {
         referencedFrom: string[];
     }
-    export import Project = project.Project;
-    export import reporter = _reporter;
-    function createProject(settings?: Settings): any;
-    function createProject(tsConfigFileName: string, settings?: Settings): any;
+    function createProject(settings?: Settings): Project;
+    function createProject(tsConfigFileName: string, settings?: Settings): Project;
     function filter(project: Project, filters: FilterSettings): NodeJS.ReadWriteStream;
+    function types(): NodeJS.ReadWriteStream;
 }
 export = compile;
